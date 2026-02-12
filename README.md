@@ -1,2 +1,3 @@
 # Nathaniel
-Always ready to learn
+Always ready to learn something new
+
