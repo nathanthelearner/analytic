@@ -1,3 +1,4 @@
+## OLD CODE
 # Setting my working directory
 # ==============================
 setwd("C:/Users/Nathaniel/Desktop/Data analysis and modelling/R/statistical analysis/Research/Scripts and directory/my working directory")
@@ -123,3 +124,97 @@ combined_table <- left_join(table_2019, table_2022,
 # Display in Viewer
 kable(combined_table, caption = "Employment Categories by Gender - July 2019 and 2022") %>%
         kable_styling(bootstrap_options = c("striped", "hover", "bordered"), full_width = FALSE)
+
+
+
+
+
+
+
+NEW CODE
+# Setting my working directory
+# ==============================
+setwd("C:/Users/Nathaniel/Desktop/Data analysis and modelling/R/statistical analysis/Research/Scripts and directory/my working directory")
+
+# Reading in survey datasets
+# =============================
+July2019 <- read_sav("JULY2019_LFS.sav")
+July2022 <- read_sav("JULY2022_LFS.sav")
+
+
+# Assigning random seed to manipulate data
+# ============================================
+set.seed(514)
+
+July2019_sample <- July2019 %>% 
+     sample_frac(0.9)
+
+July2022_sample <- July2022 %>% 
+     sample_frac(0.9)
+
+
+
+# Re-coding SEX and EMPSTATUS for 2019 and 2022 (possibly re-do)
+# ========================================================
+July2019_sample <- July2019_sample %>%
+        mutate(
+                gender_label = dplyr::case_when(
+                SEX == 1 ~ "Male",
+                SEX == 2 ~ "Female",
+                TRUE ~ NA_character_
+                ),
+                employment_status = dplyr::case_when(
+                EMPSTATUS == 0 ~ "under 14yrs/non-response",
+                EMPSTATUS == 3 ~ "employed",
+                EMPSTATUS == 4 ~ "unemployed",
+                EMPSTATUS == 5 ~ "outside",
+                TRUE ~ NA_character_
+                ))
+
+July2022_sample <- July2022_sample %>%
+        mutate(
+                gender_label = dplyr::case_when(
+                SEX == 1 ~ "Male",
+                SEX == 2 ~ "Female",
+                TRUE ~ NA_character_
+                ),
+                employment_status = case_when(
+                EMPSTATUS == 0 ~ "under 14yrs/non-response",
+                EMPSTATUS == 3 ~ "employed",
+                EMPSTATUS == 4 ~ "unemployed",
+                EMPSTATUS == 5 ~ "outside",
+                TRUE ~ NA_character_
+                ))
+
+
+# Removing missing values from columns of interest in the 2019 and 2022 datasets
+# ===============================================================================
+July2019_sample <- July2019_sample %>% 
+        filter(!is.na(employment_status),
+               !is.na(gender_label))
+
+July2022_sample <- July2022_sample %>% 
+        filter(!is.na(employment_status),
+               !is.na(gender_label))
+
+
+# Stacked bar chat representation of employment status by gender for 2019 and 2022
+# ================================================================================
+ggplot(July2019_sample, aes(x = gender_label, fill = employment_status)) + 
+        geom_bar(position = "fill") +
+        scale_y_continuous(labels = scales::percent) +
+        labs(title = "Proportional Employment status by gender(2019)",
+        x = "Gender",
+        y = "percentage (%)",
+        fill = "Status") +
+        theme_classic()
+
+
+ggplot(July2022_sample, aes(x = gender_label, fill = employment_status)) +
+        geom_bar(position = "fill") +
+        scale_y_continuous(labels = scales::percent) +
+        labs(title = "Proportional Employment status by gender(2022)",
+             x = "Gender",
+             y = "percentage (%)",
+             fill = "Status") +
+        theme_classic()
