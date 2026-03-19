@@ -1,0 +1,125 @@
+# Setting my working directory
+# ==============================
+setwd("C:/Users/Nathaniel/Desktop/Data analysis and modelling/R/statistical analysis/Research/Scripts and directory/my working directory")
+
+# Reading in survey datasets
+# =============================
+July2019 <- read_sav("JULY2019_LFS.sav")
+July2022 <- read_sav("JULY2022_LFS.sav")
+
+
+# Assigning random seed to manipulate data
+# ============================================
+set.seed(514)
+
+July2019_sample <- July2019 %>% 
+     sample_frac(0.9)
+
+July2022_sample <- July2022 %>% 
+     sample_frac(0.9)
+
+
+# Recode SEX and Q323 for 2019
+# =========================================
+July2019_sample <- July2019_sample %>%
+        dplyr::mutate(
+                gender_label = dplyr::case_when(
+                        SEX == 1 ~ "Male",
+                        SEX == 2 ~ "Female",
+                        TRUE ~ NA_character_
+                ),
+                empstatus_label = dplyr::case_when(
+                        Q323 == 1 ~ "Central/Local Government",
+                        Q323 == 2 ~ "Other Government Agencies",
+                        Q323 == 3 ~ "Private Sector",
+                        Q323 == 4 ~ "Unpaid Family Worker",
+                        Q323 == 5 ~ "Employer",
+                        Q323 == 6 ~ "Own Account Worker",
+                        Q323 == 9 ~ "Not Stated",
+                        TRUE ~ NA_character_
+                )
+        )
+
+# Check the new column appears
+July2019_sample %>%
+        dplyr::select(SEX, gender_label) %>%
+        head(10)
+
+
+
+# Recode SEX and Q323 for 2022
+# =====================================
+
+July2022_sample <- July2022_sample %>%
+        dplyr::mutate(
+                gender_label = dplyr::case_when(
+                        SEX == 1 ~ "Male",
+                        SEX == 2 ~ "Female",
+                        TRUE ~ NA_character_
+                ),
+                empstatus_label = dplyr::case_when(
+                        Q323 == 1  ~ "Central/Local Government",
+                        Q323 == 2  ~ "Other Government Agencies",
+                        Q323 == 3  ~ "Private Sector",
+                        Q323 == 4  ~ "Unpaid Family Worker",
+                        Q323 == 5  ~ "Employer",
+                        Q323 == 6  ~ "Own Account Worker",
+                        Q323 == 99 ~ "Not Stated",
+                        TRUE ~ NA_character_
+                )
+        )
+
+
+# ============================================
+# Build Employment Category Table - 2019
+# ============================================
+table_2019 <- July2019_sample %>%
+        filter(!is.na(gender_label), !is.na(empstatus_label)) %>%
+        count(empstatus_label, gender_label) %>%
+        pivot_wider(
+                names_from  = gender_label,
+                values_from = n,
+                values_fill = 0
+        ) %>%
+        rename(`Employment Categories` = empstatus_label) %>%
+        mutate(Total = Male + Female) %>%
+        arrange(`Employment Categories`)
+
+# Add a totals row
+table_2019 <- table_2019 %>%
+        bind_rows(
+                summarise(., across(where(is.numeric), sum),
+                          `Employment Categories` = "Total")
+        )
+
+
+# ============================================
+# Build Employment Category Table - 2022
+# ============================================
+table_2022 <- July2022_sample %>%
+        filter(!is.na(gender_label), !is.na(empstatus_label)) %>%
+        count(empstatus_label, gender_label) %>%
+        pivot_wider(
+                names_from  = gender_label,
+                values_from = n,
+                values_fill = 0
+        ) %>%
+        rename(`Employment Categories` = empstatus_label) %>%
+        mutate(Total = Male + Female) %>%
+        arrange(`Employment Categories`)
+
+table_2022 <- table_2022 %>%
+        bind_rows(
+                summarise(., across(where(is.numeric), sum),
+                          `Employment Categories` = "Total")
+        )
+
+
+# Join both tables
+combined_table <- left_join(table_2019, table_2022, 
+                            by = "Employment Categories",
+                            suffix = c(" (2019)", " (2022)"))
+
+# Display in Viewer
+kable(combined_table, caption = "Employment Categories by Gender - July 2019 and 2022") %>%
+        kable_styling(bootstrap_options = c("striped", "hover", "bordered"), full_width = FALSE)
