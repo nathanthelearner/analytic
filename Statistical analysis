@@ -131,7 +131,10 @@ kable(combined_table, caption = "Employment Categories by Gender - July 2019 and
 
 
 
-NEW CODE
+
+
+# NEW CODE
+# ==============================
 # Setting my working directory
 # ==============================
 setwd("C:/Users/Nathaniel/Desktop/Data analysis and modelling/R/statistical analysis/Research/Scripts and directory/my working directory")
