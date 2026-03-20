@@ -221,3 +221,869 @@ ggplot(July2022_sample, aes(x = gender_label, fill = employment_status)) +
              y = "percentage (%)",
              fill = "Status") +
         theme_classic()
+
+
+
+
+
+
+From Andrene 
+---
+title: "Group 4: Rcode"
+author: "Andrene Gordon (620161369) | Nathaniel Campbell (620165203)| Mikaela Segree (620156225) |Kitana Crosdale (620133408)|"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **General Setups and data manipulations**
+
+### Setting working directory
+
+```{r}
+
+setwd("C:/Users/andre/OneDrive/Desktop")
+```
+
+### Loading libraries
+
+```{r}
+
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(gtsummary)
+library(tidyverse)
+library(gt)
+library(tidyr)
+library(flextable)
+library(officer)
+```
+
+### Importing Original Data 
+```{r import_data}
+
+# Importing July 2019 labour Force survey data
+
+Jul2019 <- read_sav("JULY2019_LFSa.sav")
+ 
+# Exploration of July 2019 labour Force survey data
+
+dim(Jul2019)
+
+# Importing July 2022 labour Force survey data
+
+Jul2022 <- read_sav("LFS_JUL22.sav")
+
+# Exploration of July 2022 labour Force survey data
+
+dim(Jul2022)
+
+```
+
+# **Deriving Sample Data- 90% of original data**
+
+
+```{r Jul2019_sample}
+
+#Setting Random Seed
+set.seed(514)
+
+# July 2019 LFS Sample
+Jul2019_sample <- Jul2019 %>%
+  sample_frac(0.9)
+    
+dim(Jul2019_sample)
+
+View(Jul2019_sample)
+  
+```
+
+```{r Jul2022_sample}
+
+#Setting Random Seed
+set.seed(514)
+
+#July 2022 LFS Sample
+Jul2022_sample <- Jul2022 %>%
+  sample_frac(0.9)
+    
+dim(Jul2022_sample)
+
+View(Jul2022_sample)
+  
+```
+
+
+# **<u>Visualization of Data </u>**
+
+The visualizations below were designed to clearly communicate relationship within the dataset and gain more insights on variables of interest that will be used. This component is separated into two main parts. Part A presents the demographic variables from the Jamaican labour Force Survey for July 2019 and July 2022 that provides and overview of the common demographic patterns within the labour force survey in the two periods. Part B focuses on key variables that will be asses along with the main demographic variables-Sex, to explore the presence of gender disparities in the Jamaican labour force. 
+
+
+## **A. Representation of Demographic Variables**
+
+#### **The Sex Variable - SEX**
+
+```{r}
+
+# NA's Filtering and Variable recode 
+
+Jul2019_sample <- Jul2019_sample %>% 
+  filter(!is.na(SEX))
+
+Jul2019_sample$SEX <- factor(Jul2019_sample$SEX,
+                              levels = c(1,2),
+                              labels = c("Male",
+                                         "Female"))
+
+                        
+```
+
+
+
+```{r}
+
+# Variable recode
+Jul2022_sample$SEX <- factor(Jul2022_sample$SEX,
+                              levels = c(1,2),
+                              labels = c("Male",
+                                         "Female"))
+                        
+```
+
+```{r Sex_Visualization}
+
+# July 2019 Sex count Bargraph
+
+Sex_count2019 <- ggplot(data = Jul2019_sample, 
+                        aes(x = SEX, 
+                            fill = SEX)) + 
+                    geom_text(stat = "count",
+                          aes(label = after_stat(count)),
+                          position = position_dodge(width = 0.9),
+                          vjust = -0.3,
+                          color = "black",    
+                          size = 2)+
+                    geom_bar() + 
+                    scale_fill_manual(values = c("Male" = "darkblue", 
+                                                 "Female" = "darkgreen")) +
+                    theme_minimal() +
+                    labs(title = "July 2019 Sex Count",
+                         x = "Gender", 
+                         y = "Frequency")
+
+
+# July 2022 Sex count Bargraph
+
+Sex_count2022 <- ggplot(data = Jul2022_sample, 
+                        aes(x = SEX, 
+                            fill = SEX)) + 
+                    geom_text(stat = "count",
+                          aes(label = after_stat(count)),
+                          position = position_dodge(width = 0.9),
+                          vjust = -0.3,
+                          color = "black",    
+                          size = 2)+
+                    geom_bar() + 
+                    scale_fill_manual(values = c("Male" = "darkblue", 
+                                                 "Female" = "darkgreen")) +
+                    theme_minimal() +
+                    labs(title = "July 2022 Sex Count", 
+                         x = "Gender", 
+                         y= "Frequency")
+                    
+
+# Merged Sex Counts by Year
+
+Sex_count <- grid.arrange(Sex_count2019,
+                           Sex_count2022, 
+                           top = "Figure 1: Jamaican Labour Force Survey Sex counts for July 2019 and July 2022 July ", 
+                           nrow = 1, 
+                           ncol = 2)
+```
+
+#### **The Age Variable - AGE**
+
+```{r Age_Distribution}
+
+# July 2019 Age Distribution Histogram 
+
+Age_distri2019 <- ggplot(data = Jul2019_sample, 
+                         aes(x = AGE)) +
+                    geom_histogram(bins = 100, 
+                                   fill = "darkblue", 
+                                   color = "white") +
+                    geom_density(aes(y = after_stat(count), 
+                                     color = "red", 
+                                     linewidth = 0.3)) +
+                    theme_minimal()+
+                    labs(title = "July 2019",
+                         x = "Age",
+                         y = "Frequency") 
+                    
+
+
+#July 2022 Age Distribution Histogram
+
+Age_distri2022 <- ggplot(data = Jul2022_sample,
+                         aes(x = AGE)) +
+                    geom_histogram(bins =  100, 
+                                   fill = "darkblue", 
+                                   color = "white") +
+                    geom_density(aes(y = after_stat(count), 
+                                     color = "red", 
+                                     linewidth = 0.3)) +
+                    theme_minimal() +
+                    labs(title = "July 2022",
+                         x = "Age",
+                         y = "Frequency")
+                    
+
+
+# Merged Age Distributions
+
+Age <- grid.arrange(Age_distri2019,
+                           Age_distri2022, 
+                           top = "Figure 2: Jamaican Labour Force Survey Age distribution for July 2019 and July 2022 July", 
+                           nrow = 2, 
+                           ncol = 1)
+```
+
+
+#### **The Relationship to head of household Variable - RELAT**
+
+```{r RELAT_2019}
+
+# Manipulation of variable
+# Variable recoding 
+
+Jul2019_sample <- Jul2019_sample %>%
+  mutate(RELATION = case_when(
+    RELAT == 1 ~ "Head",
+    RELAT == 2 ~ "Partner",
+    RELAT == 3 ~ "Child of Head",
+    RELAT == 4 ~ "Spouse of Child",
+    RELAT == 5 ~ "Grandchild",
+    RELAT == 6 ~ "Parent of Head",
+    RELAT == 7 ~ "Other Relative",
+    RELAT == 8 ~ "Helper",
+    RELAT == 9 ~ "Other/Not Related",
+    TRUE ~ NA_character_
+    )) %>%
+    filter(!is.na(RELATION))
+
+# Converting RELATION to a factor
+Jul2019_sample$RELATION <- factor(Jul2019_sample$RELATION,
+                                  levels = c("Head", 
+                                             "Partner", 
+                                             "Child of Head", 
+                                             "Spouse of Child",      
+                                             "Grandchild", 
+                                             "Parent of Head", 
+                                             "Other Relative",     
+                                             "Helper", 
+                                             "Other/Not Related"))
+  
+# Summary table
+RELAT_2019 <- Jul2019_sample %>%
+                count(RELATION) %>%
+                mutate(
+                  `2019 Frequency` = n,
+                  `2019 (%)` = round(n / sum(n) * 100, 2)
+                ) %>%
+                select(RELATION, `2019 Frequency`, `2019 (%)`)
+
+
+
+```
+
+
+```{r RELAT_2022}
+
+# Manipulation of variable
+# Variable recoding
+
+Jul2022_sample <- Jul2022_sample %>%
+  mutate(RELATION = case_when(
+    RELAT == 1 ~ "Head",
+    RELAT == 2 ~ "Partner",
+    RELAT == 3 ~ "Child of Head",
+    RELAT == 4 ~ "Spouse of Child",
+    RELAT == 5 ~ "Grandchild",
+    RELAT == 6 ~ "Parent of Head",
+    RELAT == 7 ~ "Other Relative",
+    RELAT == 8 ~ "Helper",
+    RELAT == 9 ~ "Other/Not Related",
+    TRUE ~ NA_character_
+    )) %>%
+    filter(!is.na(RELATION))
+
+# Converting RELATION to a factor
+Jul2022_sample$RELATION <- factor(Jul2022_sample$RELATION,
+                                  levels = c("Head", 
+                                             "Partner", 
+                                             "Child of Head", 
+                                             "Spouse of Child",      
+                                             "Grandchild", 
+                                             "Parent of Head", 
+                                             "Other Relative",     
+                                             "Helper", 
+                                             "Other/Not Related"))
+
+
+
+# Summary table
+RELAT_2022 <- Jul2022_sample %>%
+                count(RELATION) %>%
+                mutate(
+                  `2022 Frequency` = n,
+                  `2022 (%)` = round(n / sum(n) * 100, 2)
+                ) %>%
+                select(RELATION, `2022 Frequency`, `2022 (%)`)
+```
+
+
+```{r RELAT_crosstab}
+
+RELAT_crosstab <- full_join(RELAT_2019, 
+                           RELAT_2022, 
+                           by = "RELATION")
+
+# Order control
+RELAT_crosstab$RELATION <- factor(RELAT_crosstab$RELATION,
+                                  levels = c("Head", 
+                                             "Partner", 
+                                             "Child of Head", 
+                                             "Spouse of Child",      
+                                             "Grandchild", 
+                                             "Parent of Head", 
+                                             "Other Relative",     
+                                             "Helper", 
+                                             "Other/Not Related"))
+
+RELAT_crosstab <- RELAT_crosstab %>%
+                    arrange(RELATION)
+
+kable(RELAT_crosstab,
+      col.names = c("RELATION", 
+                    "2019 Frequency", "2019 (%)",
+                    "2022 Frequency", "2022 (%)"),
+      caption = "Table 1: Relationship to Head of Household, July 2019 vs July 2022") %>%
+  kable_styling(full_width = FALSE)
+
+```
+
+
+
+## **B. Representation of Key Variables**
+
+#### **Employment Status Variable - EMPSTAT**
+```{r}
+# Re-coding SEX and EMPSTATUS for 2019 and 2022 
+
+Jul2019_sample <- Jul2019_sample %>%
+        mutate(
+                gender_label = dplyr::case_when(
+                SEX == 1 ~ "Male",
+                SEX == 2 ~ "Female",
+                TRUE ~ NA_character_
+                ),
+                employment_status = dplyr::case_when(
+                EMPSTATUS == 0 ~ "under 14yrs/non-response",
+                EMPSTATUS == 3 ~ "employed",
+                EMPSTATUS == 4 ~ "unemployed",
+                EMPSTATUS == 5 ~ "outside",
+                TRUE ~ NA_character_
+                ))
+
+Jul2022_sample <- Jul2022_sample %>%
+        mutate(
+                gender_label = dplyr::case_when(
+                SEX == 1 ~ "Male",
+                SEX == 2 ~ "Female",
+                TRUE ~ NA_character_
+                ),
+                employment_status = case_when(
+                EMPSTATUS == 0 ~ "under 14yrs/non-response",
+                EMPSTATUS == 3 ~ "employed",
+                EMPSTATUS == 4 ~ "unemployed",
+                EMPSTATUS == 5 ~ "outside",
+                TRUE ~ NA_character_
+                ))
+
+
+# Removing missing values from columns of interest in the 2019 and 2022 datasets
+Jul2019_sample <- Jul2019_sample %>% 
+        filter(!is.na(employment_status),
+               !is.na(gender_label))
+
+Jul2022_sample <- Jul2022_sample %>% 
+        filter(!is.na(employment_status),
+               !is.na(gender_label))
+
+
+# Stacked bar chat representation of employment status by gender for 2019 and 2022
+
+ggplot(Jul2019_sample, aes(x = gender_label, fill = employment_status)) + 
+        geom_bar(position = "fill") +
+        scale_y_continuous(labels = scales::percent) +
+        labs(title = "Proportional Employment status by gender(2019)",
+        x = "Gender",
+        y = "percentage (%)",
+        fill = "Status") +
+        theme_classic()
+
+
+ggplot(Jul2022_sample, aes(x = gender_label, fill = employment_status)) +
+        geom_bar(position = "fill") +
+        scale_y_continuous(labels = scales::percent) +
+        labs(title = "Proportional Employment status by gender(2022)",
+             x = "Gender",
+             y = "percentage (%)",
+             fill = "Status") +
+        theme_classic()
+
+
+```
+
+
+#### **Highest Examination passed - Q322**
+
+```{r EduAtt2019}
+
+# Variable Recode
+
+Jul2019_sample <- Jul2019_sample %>%
+  dplyr::rename(EduAtt2019 = Q322)
+
+Jul2019_sample <- Jul2019_sample %>%
+  mutate(EduAtt20199 = case_when(
+      EduAtt2019 == 1 ~ 1,
+      EduAtt2019 %in% 2:5 ~ 2,
+      EduAtt2019 %in% 6:7~ 3,
+      EduAtt2019 == 8 ~ 4,
+      EduAtt2019 == 9 ~ 5,
+      EduAtt2019 == 99 ~ 6,
+      TRUE ~ NA_real_
+      ))
+
+Jul2019_sample$EduAtt2019 <- factor(Jul2019_sample$EduAtt2019,
+                              levels = c(1,2,3,4,5,6),
+                              labels = c("NONE", "CXC", "CAPE", "DEGREE", "OTHER", "NOT STATED"))                   
+                              
+# Remove NA's
+Jul2019_sample <- Jul2019_sample %>% 
+  filter(!is.na(EduAtt2019), !is.na(SEX))
+
+
+# July 2019 Highest Educational Attainment by Sex Bar graph
+
+EduAtt2019<- ggplot(data = Jul2019_sample, 
+                      aes(x = EduAtt2019, 
+                          fill = SEX)) + 
+                  geom_bar(position = "dodge")  +
+                  geom_text(stat = "count",
+                          aes(label = after_stat(count)),
+                          position = position_dodge(width = 0.9),
+                          vjust = -0.3,
+                          color = "black",    
+                          size = 2) +
+                  scale_fill_manual(values = c("Male" = "darkblue", 
+                                               "Female" = "darkgreen")) +
+                  theme_minimal() +
+                  theme(axis.text.x = element_text(angle = 45, 
+                                                 hjust = 1),
+                      legend.position = "none")+
+                  labs(title = "Figure 5: Levels of Educational Attainment by sex for July 2019", 
+                      x = "Educational Levels", 
+                      y = "Frequency")
+
+                 
+# Results 
+EduAtt2019
+  
+
+```
+
+
+```{r EduAtt2022}
+
+# Variable Recode
+
+Jul2022_sample <- Jul2022_sample %>% 
+  dplyr::rename(EduAtt2022 = Q117)
+
+Jul2022_sample <- Jul2022_sample %>% 
+  mutate(EduAtt2022 = case_when(
+    EduAtt2022 == 1 ~ 1,
+    EduAtt2022 %in% 2:5 ~ 2,
+    EduAtt2022 %in% 6:7~ 3,
+    EduAtt2022 == 8 ~ 4,
+    EduAtt2022 == 96 ~ 5,
+    EduAtt2022 == 99 ~ 6,
+    TRUE ~ NA_real_ 
+    ))
+
+
+Jul2022_sample$EduAtt2022 <- factor(Jul2022_sample$EduAtt2022,
+                                      levels = c(1,2,3,4,5,6),
+                                      labels = c("NONE", "CXC", "CAPE", "DEGREE", "OTHER", "NOT STATED"))
+
+
+# Remove NA's
+Jul2022_sample <- Jul2022_sample %>% 
+  filter(!is.na(EduAtt2022), !is.na(SEX))
+
+#July 2022 Highest Educational Attainment by Sex Bar graph
+
+EduAtt2022<- ggplot(data = Jul2022_sample, 
+                      aes(x = EduAtt2022, 
+                          fill = SEX)) + 
+                  geom_bar(position = "dodge")  +
+                  geom_text(stat = "count",
+                          aes(label = after_stat(count)),
+                          position = position_dodge(width = 0.9),
+                          vjust = -0.3,
+                          color = "black",    
+                          size = 2) +
+                  scale_fill_manual(values = c("Male" = "darkblue", 
+                                               "Female" = "darkgreen")) +
+                  theme_minimal() +
+                  theme(axis.text.x = element_text(angle = 45, 
+                                                 hjust = 1),
+                      legend.position = "none")+
+                  labs(title = "Figure 6: Levels of Educational Attainment by sex for July 2022", 
+                      x = "Educational Levels", 
+                      y = "Frequency")
+
+
+
+
+
+
+#Results
+
+EduAtt2022
+```
+
+#### **Weekly hours Worked Variable - Q33**
+
+```{r Weekly_worked_Hrs_July2019}
+
+# Manipulation of data
+# Filtering 2019 sample 
+
+Jul2019_sample <- Jul2019_sample %>%
+                  mutate(
+                  Q33 = ifelse(Q33 == 999, NA, Q33),
+                  SEX = as_factor(SEX)
+                  ) %>%
+                  filter(!is.na(SEX), !is.na(Q33), Q33 <= 168 )
+
+
+# 2019 Males' Boxplot 
+WkedHr_Males2019 <- ggplot(filter(Jul2019_sample, 
+                                  SEX == "Male"),
+                           aes(x = "", y = Q33)) +
+                      geom_boxplot(fill = "darkblue") +
+                      stat_summary(fun = mean,
+                                   geom = "text",              
+                                   aes(label = paste("Mean =", round(after_stat(y),1))),                        
+                                   vjust = -3,                        
+                                   colour = "black") +
+                      theme_minimal()+
+                      labs(x = "Males",                 
+                           y = "Hours")
+                    
+  
+# 2019 Females' Box plot
+WkedHr_Females2019 <- ggplot(filter(Jul2019_sample, 
+                                    SEX == "Female"),
+                           aes(x = "", y = Q33)) +
+                        geom_boxplot(fill = "darkgreen") +
+                        stat_summary(fun = mean,
+                                     geom = "text",                      
+                                     aes(label = paste("Mean =", round(after_stat(y),1))),                 
+                                     vjust = -3,                        
+                                     colour = "black") +
+                      theme_minimal() +
+                      labs(x = "Females",
+                           y = "Hours")
+                   
+# July 2019 merged Box plots
+Weekly_hrs2019 <- grid.arrange(WkedHr_Males2019,
+                               WkedHr_Females2019,
+                               top = "July 2019 Worked Hour",
+                               ncol = 2)
+
+
+```	
+Warning: The dot-dot notation (`..y..`) was deprecated in ggplot2 3.4.0. ℹ Please use `after_stat(y)` instead. This warning is displayed once per session. Call ]8;;ide:run:lifecycle::last_lifecycle_warnings()lifecycle::last_lifecycle_warnings()]8;; to see where this warning was generated.
+
+Show in New Window
+
+
+```{r Weekly_worked_Hrs_July2022}
+
+
+# Filtering NA's and Unrealistic valuess
+
+Jul2022_sample <- Jul2022_sample %>%
+  mutate(
+        Q33 = ifelse(Q33 == 999, NA, Q33),
+        SEX = as_factor(SEX)  
+        ) %>%
+        filter(!is.na(SEX), !is.na(Q33), Q33 <= 168)
+
+                             
+# 2022 Males' Boxplot 
+WkedHr_Males2022 <- ggplot(filter(Jul2022_sample, 
+                                  SEX == "Male"),
+                          aes(x = "", y = Q33)) +
+                      geom_boxplot(fill = "darkblue") +
+                      stat_summary(fun = mean,
+                                   geom = "text",
+                                   aes(label = paste("Mean =", round(after_stat(y), 1))),
+                                   vjust = -3,                        
+                                   colour = "black") +
+                      theme_minimal() +
+                      labs(y = "Hours",
+                           x = "Males")
+                
+                      
+
+# 2022 Females' Box plot 
+WkedHr_Females2022 <- ggplot(filter(Jul2022_sample,
+                                    SEX == "Female"),
+                            aes(x = "", y = Q33)) +
+                            geom_boxplot(fill = "darkgreen") +
+                            stat_summary(fun = mean,
+                                         geom = "text",
+                                         aes(label = paste("Mean =", round(after_stat(y),1))),
+                                         vjust = -3,
+                                         colour = "black") + 
+                            theme_minimal() +
+                            labs(y = "Hours",
+                                 x = "Females")
+                            
+                              
+#July 2022 Merged boxplots
+Weekly_hrs2022 <- grid.arrange(WkedHr_Males2022, 
+                               WkedHr_Females2022, 
+                               top = "July 2022 Worked Hour",
+                               ncol = 2)
+
+
+
+```
+
+##### Mergered Boxplots by sex and year
+```{r}
+
+Weekly_hrs <- grid.arrange(Weekly_hrs2019, 
+                           Weekly_hrs2022, 
+                           top = "Figure 7: Weekly Hours Worked by Sex and July Survey year", 
+                           nrow = 2, 
+                           ncol = 1)
+```
+
+##### Summary Statatics on ususal hours worked per week
+```{r}
+#summary statistics of weekly hours worked by sex and year 
+
+# For 2019
+summary_2019 <- Jul2019_sample %>%
+  group_by(SEX) %>%
+  summarise(
+    Count = n(),
+    Mean = mean(Q33, na.rm = TRUE),
+    Median = median(Q33, na.rm = TRUE),
+    Mode = as.numeric(names(sort(table(Q33), decreasing = TRUE)[1])),
+    Min = min(Q33, na.rm = TRUE),
+    Max = max(Q33, na.rm = TRUE),
+    SD = sd(Q33, na.rm = TRUE)
+  ) %>%
+  mutate(Year = "2019")
+
+
+# For 2022
+summary_2022 <- Jul2022_sample %>%
+  filter(Q33 != 999, !is.na(Q33), !is.na(SEX)) %>%
+  group_by(SEX) %>%
+  summarise(
+    Count = n(),
+    Mean = mean(Q33, na.rm = TRUE),
+    Median = median(Q33, na.rm = TRUE),
+    Mode = as.numeric(names(sort(table(Q33), decreasing = TRUE)[1])),
+    Min = min(Q33, na.rm = TRUE),
+    Max = max(Q33, na.rm = TRUE),
+    SD = sd(Q33, na.rm = TRUE)
+  ) %>%
+  mutate(Year = "2022")
+
+
+# Bind and arrange summary statistics by Year and Sex 
+summary_all <- bind_rows(summary_2019, summary_2022) %>%
+  mutate(SEX = factor(SEX, levels = c("Male", "Female"))) %>%
+  arrange(Year, SEX) %>%
+  select(Year, SEX, Count, Mean, Median, Mode, Min, Max, SD)
+
+# Merge summary statistics
+Stats_Sum <- kable(summary_all,
+      digits = 2,
+      caption = "Table 2: Summary Statistics of Weekly Hours Worked by Year and Sex") %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0, bold = TRUE)
+
+# Display summary
+Stats_Sum
+
+```
+
+
+
+#### **Employment Categories**
+
+```{r Empcat_2019}
+
+Jul2019_sample$Q323 <- factor(Jul2019_sample$Q323,
+                          levels = c(1, 2, 3, 4, 5, 6),
+                          labels = c("Central/Local Govt. Employee",
+                                     "Other Govt. Agencies Employee",
+                                     "Private Sector Employee",
+                                     "Unpaid Family Worker",
+                                     "Employer",
+                                     "Own Account Worker"))
+
+# Table 
+EMPCAT_tab2019 <- Jul2019_sample %>%
+                          filter(Q323 != 99, !is.na(Q323), !is.na(SEX)) %>% 
+                          count(Q323, SEX) %>%
+                          pivot_wider(names_from  = SEX,
+                                      values_from = n,
+                                      values_fill = 0) %>%
+                            mutate(
+                            Total      = Male + Female,
+                            Male_pct   = round((Male / Total) * 100, 1),
+                            Female_pct = round((Female / Total) * 100, 1)
+                          ) %>%
+                          rename(
+                            `Employment Position` = Q323,
+                            `Male n`              = Male,
+                            `Female n`            = Female,
+                            `Male %`              = Male_pct,
+                            `Female %`            = Female_pct
+                          )
+
+# Add total row 2019
+EMPCAT_tab2019_TOTAL <- EMPCAT_tab2019 %>%
+                                summarise(
+                                  `Employment Position` = as.character("Total"),
+                                  `Male n`              = sum(`Male n`, na.rm = TRUE),
+                                  `Female n`            = sum(`Female n`, na.rm = TRUE),
+                                  Total                 = sum(Total, na.rm =TRUE),
+                                  `Male %`              = round((sum(`Male n`) / sum(Total)) * 100, 1),
+                                  `Female %`            = round((sum(`Female n`) / sum(Total)) * 100, 1))
+
+#BIND ROWS
+EMPCAT_2019 <- bind_rows(EMPCAT_tab2019, 
+                               EMPCAT_tab2019_TOTAL)
+
+
+```
+
+```{r July_2022}
+
+# Variable Recode
+
+Jul2022_sample$Q323 <- factor(Jul2022_sample$Q323,
+                          levels = c(1, 2, 3, 4, 5, 6),
+                          labels = c("Central/Local Govt. Employee",
+                                     "Other Govt. Agencies Employee",
+                                     "Private Sector Employee",
+                                     "Unpaid Family Worker",
+                                     "Employer",
+                                     "Own Account Worker"))
+
+# Table 
+EMPCAT_tab2022 <- Jul2022_sample %>%
+                          filter(Q323 != 99, !is.na(Q323), !is.na(SEX)) %>%
+                          count(Q323, SEX) %>%
+                          pivot_wider(names_from  = SEX,
+                                      values_from = n,
+                                      values_fill = 0) %>%
+                            mutate(
+                            Total      = Male + Female,
+                            Male_pct   = round((Male / Total) * 100, 1),
+                            Female_pct = round((Female / Total) * 100, 1)
+                          ) %>%
+                          rename(
+                            `Employment Position` = Q323,
+                            `Male n`              = Male,
+                            `Female n`            = Female,
+                            `Male %`              = Male_pct,
+                            `Female %`            = Female_pct
+                          )
+
+# Add total row 2022
+EMPCAT_tab2022_TOTAL <- EMPCAT_tab2022 %>%
+                                summarise(
+                                  `Employment Position` = as.character("Total"),
+                                  `Male n`              = sum(`Male n`, na.rm = TRUE),
+                                  `Female n`            = sum(`Female n`, na.rm = TRUE),
+                                  Total                 = sum(Total, na.rm =TRUE),
+                                  `Male %`              = round((sum(`Male n`) / sum(Total)) * 100, 1),
+                                  `Female %`            = round((sum(`Female n`) / sum(Total)) * 100, 1))
+
+#BIND ROWS
+EMPCAT_2022 <- bind_rows(EMPCAT_tab2022, 
+                               EMPCAT_tab2022_TOTAL)
+
+
+```
+
+
+```{r}
+# Combine both years into one table
+
+EMPCAT <- dplyr::full_join(EMPCAT_2019, EMPCAT_2022,
+                            by = "Employment Position",
+                            suffix = c(" 2019", " 2022"))
+
+EMPCAT <- EMPCAT %>%
+  dplyr::ungroup()
+  
+# Convert into flextable
+
+EMPCAT %>%
+  flextable() %>%
+  bold(part = "header") %>%
+  bg(part = "header", bg = "white") %>%
+  color(part = "header", 
+        color = "black") %>%
+  add_header_lines("Table 3: Employment Position by Sex - Jamaica LFS 2019 vs 2022") %>%
+  align(align = "center", 
+        part = "all") %>%
+  align(j = 1, 
+        align = "left", 
+        part = "all") %>%
+  border_outer() %>%
+  border_inner_h() %>%
+  border_inner_v() %>%
+  bg(i = seq(1, nrow(EMPCAT), 
+             2), 
+     bg = "lightgrey", 
+     part = "body") %>%
+  bold(j = 1, 
+       part = "body") %>%
+  flextable::autofit()
+
+```
